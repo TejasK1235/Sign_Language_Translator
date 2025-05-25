@@ -15,7 +15,7 @@ for j in range(number_of_classes):
     if not os.path.exists(os.path.join(DATA_DIR, str(j))):
         os.makedirs(os.path.join(DATA_DIR, str(j)))
 
-    print('Collecting data for class {}'.format(j))
+    print(f'Collecting data for class {j}')
 
     done = False
     while True:
@@ -30,7 +30,7 @@ for j in range(number_of_classes):
         ret, frame = cap.read()
         cv2.imshow('frame', frame)
         cv2.waitKey(25)
-        cv2.imwrite(os.path.join(DATA_DIR, str(j), '{}.jpg'.format(counter)), frame)
+        cv2.imwrite(os.path.join(DATA_DIR, str(j), f'{counter}.jpg'), frame)
 
         counter += 1
 

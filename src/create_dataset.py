@@ -33,11 +33,13 @@ for dir in os.listdir(DATA_DIR):
                     temp.append(x)
                     temp.append(y)
 
-            data.append(temp)
-            labels.append(dir)
+            if len(temp) == 42: # as mediapipe expects 42 landmarks here --> 21(default no. of landmarks)x2(x & y) = 42
+                data.append(temp)
+                labels.append(dir)
 
 
-with open('data.pickle','wb') as f:
+os.makedirs('artifacts', exist_ok=True)
+with open('artifacts/data.pickle','wb') as f:
     pickle.dump({'data':data,'labels':labels},f)
 
 #         plt.figure()
