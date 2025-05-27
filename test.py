@@ -3,7 +3,7 @@ import mediapipe as mp
 import numpy as np
 import pickle
 
-
+# Just a script to test the system without the flask app
 
 model_dict = pickle.load(open('artifacts/model.pkl', 'rb'))
 model = model_dict['model']
@@ -13,7 +13,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 
-labels_dict = {0: 'Hello',1: 'Yes',2: 'No',3: 'Instant Transmission',4: 'Fuck You'}
+labels_dict = {0: 'Hello',1: 'Yes',2: 'No',3: 'Instant Transmission',4: 'LOL'}
 
 cap = cv2.VideoCapture(0)
 
