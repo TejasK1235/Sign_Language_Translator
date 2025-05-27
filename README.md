@@ -94,5 +94,10 @@ Add more gesture classes for wider vocabulary
 
 Improve image preprocessing to support low-resolution or noisy camera feeds
 
+## 🔗 Live Demo
+
+👉 [Check out the live app on Render](https://sign-language-translator-4nf6.onrender.com)
+
+
 ## 👤 Author
 Tejas Kothavale
