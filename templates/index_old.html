@@ -295,20 +295,11 @@
 
             <!-- Start Button -->
             <section class="start-section fade-in-up-delay">
-                <button class="start-button" onclick="startCamera()" id="startBtn">
+                <button class="start-button" onclick="startTranslator()" id="startBtn">
                     <span id="btnText">Start Translation</span>
                 </button>
-                <button class="start-button" onclick="stopCamera()" style="margin-left: 10px; background: #ef4444;">
-                    Stop
-                </button>
                 <div class="status-message" id="statusMessage"></div>
-                <div style="margin-top: 20px;">
-                    <video id="video" width="400" height="300" autoplay muted></video>
-                    <canvas id="canvas" width="400" height="300" style="display: none;"></canvas>
-                    <h3 style="margin-top: 1rem;">Prediction: <span id="prediction">---</span></h3>
-                </div>
             </section>
-
 
             <!-- Features -->
             <section class="features fade-in-up-delay">
@@ -350,14 +341,6 @@
     </div>
 
     <script>
-        let video = document.getElementById('video');
-        let canvas = document.getElementById('canvas');
-        let ctx = canvas.getContext('2d');
-        let predictionText = document.getElementById('prediction');
-        let streaming = false;
-        let captureInterval;
-        let mediaStream = null;
-
         function showStatus(message, type = 'success') {
             const statusElement = document.getElementById('statusMessage');
             statusElement.textContent = message;
@@ -368,75 +351,44 @@
             }, 5000);
         }
 
-        function startCamera() {
+        function startTranslator() {
             const button = document.getElementById('startBtn');
             const buttonText = document.getElementById('btnText');
             
+            // Show loading state
             button.classList.add('loading');
             buttonText.textContent = 'Starting...';
-
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function (stream) {
-                    mediaStream = stream;
-                    video.srcObject = stream;
-                    video.play();
-                    streaming = true;
-                    showStatus('Webcam started successfully!', 'success');
-                    button.classList.remove('loading');
-                    buttonText.textContent = 'Streaming...';
-
-                    captureInterval = setInterval(() => {
-                        if (streaming) {
-                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                            let dataURL = canvas.toDataURL('image/jpeg');
-                            fetch('/predict', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ image: dataURL })
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                predictionText.textContent = data.prediction || "---";
-                            })
-                            .catch(err => {
-                                console.error('Prediction error:', err);
-                            });
-                        }
-                    }, 1000);
-                })
-                .catch(function (err) {
-                    console.log("Error: " + err);
-                    showStatus('Failed to start webcam. Please try again.', 'error');
+            
+            fetch('/launch')
+                .then(response => response.text())
+                .then(msg => {
+                    // Reset button state
                     button.classList.remove('loading');
                     buttonText.textContent = 'Start Translation';
+                    
+                    // Show success message
+                    showStatus('Webcam started successfully! Press Q in the webcam window to quit.', 'success');
+                })
+                .catch(error => {
+                    // Reset button state
+                    button.classList.remove('loading');
+                    buttonText.textContent = 'Start Translation';
+                    
+                    // Show error message
+                    showStatus('Failed to start webcam. Please try again.', 'error');
+                    console.error('Error:', error);
                 });
         }
 
-        function stopCamera() {
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-                mediaStream = null;
-            }
-
-            if (captureInterval) {
-                clearInterval(captureInterval);
-            }
-
-            video.srcObject = null;
-            predictionText.textContent = "---";
-            streaming = false;
-
-            // Reset button text
-            const button = document.getElementById('startBtn');
-            const buttonText = document.getElementById('btnText');
-            buttonText.textContent = 'Start Translation';
-
-            showStatus('Webcam stopped successfully.', 'success');
-        }
+        // Add smooth scrolling for better UX
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add stagger animation to feature cards
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach((card, index) => {
+                card.style.animationDelay = `${0.1 * index}s`;
+                card.classList.add('fade-in-up');
+            });
+        });
     </script>
-
-
 </body>
 </html>

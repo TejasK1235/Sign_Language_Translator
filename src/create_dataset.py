@@ -37,13 +37,12 @@ for dir in os.listdir(DATA_DIR):
                 data.append(temp)
                 labels.append(dir)
 
+    #         plt.figure()
+    #         plt.imshow(img_rgb)
+
+        
+    # plt.show()
 
 os.makedirs('artifacts', exist_ok=True)
 with open('artifacts/data.pickle','wb') as f:
     pickle.dump({'data':data,'labels':labels},f)
-
-#         plt.figure()
-#         plt.imshow(img_rgb)
-
-    
-# plt.show()

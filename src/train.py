@@ -5,8 +5,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score,classification_report
 
 data_dict = pickle.load(open('artifacts/data.pickle','rb'))
-# print(len(data_dict['labels']))
-# print(len(data_dict['data']))
+print(len(data_dict['labels']))
+print(len(data_dict['data']))
 
 data = np.array(data_dict['data'])
 labels = np.array(data_dict['labels'])
@@ -21,5 +21,5 @@ y_pred = model.predict(X_test)
 print(accuracy_score(y_pred,y_test))
 print(classification_report(y_test,y_pred))
 
-with open('model.pkl','wb') as f:
+with open('artifacts/model.pkl','wb') as f:
     pickle.dump({'model':model},f)

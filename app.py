@@ -1,9 +1,9 @@
-from flask import Flask, render_template
-import cv2
+from flask import Flask, render_template, request, jsonify
 import mediapipe as mp
 import numpy as np
 import pickle
-import threading
+import cv2
+import base64
 
 app = Flask(__name__)
 
@@ -13,73 +13,55 @@ model = model_dict['model']
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
 hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 
-labels_dict = {0: 'Yes', 1: 'No', 2: 'Hello'}
+labels_dict = {0: 'Hello',1: 'Yes',2: 'No',3: 'Instant Transmission',4: 'LOL'}
 
-def run_translator():
-    cap = cv2.VideoCapture(0)
+def process_frame(image_data):
+    # Decode base64 image to OpenCV format
+    encoded_data = image_data.split(',')[1]
+    decoded_data = base64.b64decode(encoded_data)
+    np_data = np.frombuffer(decoded_data, np.uint8)
+    frame = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
 
+    temp, x_, y_ = [], [], []
+    height, width, _ = frame.shape
+    # Opencv uses the base image format as BGR but for literally everything else at backend
+    # we need it as RGB format
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = hands.process(frame_rgb)
 
-    while True:
-        temp, x_, y_ = [], [], []
+    prediction = ""
 
-        ret, frame = cap.read()
-        if not ret:
-            break
+    if results.multi_hand_landmarks:
+        for hand_landmarks in results.multi_hand_landmarks:
+            for i in range(len(hand_landmarks.landmark)):
+                x = hand_landmarks.landmark[i].x
+                y = hand_landmarks.landmark[i].y
+                temp.append(x)
+                temp.append(y)
+                x_.append(x)
+                y_.append(y)
 
-        height, width, _ = frame.shape
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = hands.process(frame_rgb)
+        try:
+            preds = model.predict([np.array(temp)])
+            pred_label = labels_dict[int(preds[0])]
+            prediction = pred_label
+        except:
+            prediction = ""
 
-        if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
-                mp_drawing.draw_landmarks(
-                    frame,
-                    hand_landmarks,
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                    mp_drawing_styles.get_default_hand_connections_style())
-
-            for hand_landmarks in results.multi_hand_landmarks:
-                for i in range(len(hand_landmarks.landmark)):
-                    x = hand_landmarks.landmark[i].x
-                    y = hand_landmarks.landmark[i].y
-                    temp.append(x)
-                    temp.append(y)
-                    x_.append(x)
-                    y_.append(y)
-
-            x1 = int(min(x_) * width) - 10
-            y1 = int(min(y_) * height) - 10
-            x2 = int(max(x_) * width) - 10
-            y2 = int(max(y_) * height) - 10
-
-            try:
-                preds = model.predict([np.array(temp)])
-                pred_label = labels_dict[int(preds[0])]
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
-                cv2.putText(frame, pred_label, (x1, y1 - 10), cv2.FONT_HERSHEY_PLAIN, 1.3, (0, 0, 0), 3, cv2.LINE_AA)
-            except Exception:
-                pass
-
-        cv2.imshow('Sign Language Translator',frame)
-
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+    return prediction
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/launch')
-def launch():
-    threading.Thread(target=run_translator, daemon=True).start()
-    return 'Webcam started. Press Q in the webcam window to quit.'
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.json
+    image_data = data['image']
+    prediction = process_frame(image_data)
+    return jsonify({'prediction': prediction})
 
 if __name__ == '__main__':
     app.run(debug=True)
