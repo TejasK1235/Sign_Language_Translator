@@ -27,16 +27,16 @@ SignSpeak/
 │
 ├── src/
 │ ├── collect_images.py # Script to collect raw gesture images
-│ ├── create_dataset.py # Extract hand landmarks using MediaPipe
+│ ├── create_dataset.py # Extract hand landmarks
 │ └── train.py # Train the gesture recognition model
 │
 ├── templates/
-│ └── index.html # Home page with project info and Start button
+│ └── index.html # Home page
 │
 ├── .gitignore
 ├── README.md
 ├── app.py # Flask app to serve the interface and webcam feed
-└── requirements.txt # List of dependencies
+└── requirements.txt # List of required libraries
 ```
 
 
@@ -46,8 +46,8 @@ SignSpeak/
 
 1. Visit the web interface served via Flask.  
 2. Click the **Start** button on the homepage.  
-3. A webcam window will pop up. Perform your gesture in front of the camera.  
-4. Press `q` to close the webcam window and return to the homepage.
+3. A webcam will be activated. Perform your gesture in front of the camera.  
+4. Press the **Stop** button to close the webcam.
 
 ---
 
@@ -85,4 +85,14 @@ Simply run:
 
 ```bash
 python app.py
+```
+
 Then open a browser and navigate to your local machine's IP Address
+
+## 🚧 Future Improvements
+Add more gesture classes for wider vocabulary
+
+Improve image preprocessing to support low-resolution or noisy camera feeds
+
+## 👤 Author
+Tejas Kothavale
